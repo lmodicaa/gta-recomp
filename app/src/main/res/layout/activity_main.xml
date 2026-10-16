@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0D0E12"
+    android:padding="20dp"
+    android:gravity="center_horizontal">
+
+    <!-- Header -->
+    <TextView
+        android:id="@+id/tvLauncherTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="reGTA Launcher"
+        android:textColor="#F6D20F"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05" />
+
+    <TextView
+        android:id="@+id/tvLauncherSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Selecciona el modo de carga de datos para iniciar el juego"
+        android:textColor="#A0A0B0"
+        android:textSize="13sp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Cards container (Landscape side-by-side) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:gravity="center">
+
+        <!-- LITE MODE CARD -->
+        <LinearLayout
+            android:id="@+id/cardLite"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚡ MODO LITE (DATA)"
+                android:textColor="#F6D20F"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Carga datos sueltos sin OBB.\nIdeal para mods, archivos extraídos y Lite versions."
+                android:textColor="#C0C0D0"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📁 Android/data/com.gta.reversed/files/"
+                android:textColor="#7A7A90"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnPlayLite"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="JUGAR EN LITE"
+                android:textColor="#000000"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:background="@drawable/btn_gold" />
+        </LinearLayout>
+
+        <!-- FULL MODE CARD -->
+        <LinearLayout
+            android:id="@+id/cardFull"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/card_background"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📦 MODO FULL (OBB)"
+                android:textColor="#4CC9F0"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:text="Carga desde paquetes oficiales OBB.\nRequiere main y patch en la carpeta obb."
+                android:textColor="#C0C0D0"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📁 Android/obb/com.gta.reversed/"
+                android:textColor="#7A7A90"
+                android:textSize="11sp"
+                android:fontFamily="monospace"
+                android:layout_marginBottom="12dp" />
+
+            <Button
+                android:id="@+id/btnPlayFull"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="JUGAR EN FULL"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:background="@drawable/btn_dark" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Footer Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="10dp">
+
+        <CheckBox
+            android:id="@+id/cbRememberChoice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recordar mi elección"
+            android:textColor="#9090A0"
+            android:textSize="12sp"
+            android:buttonTint="#F6D20F" />
+
+        <View
+            android:layout_width="24dp"
+            android:layout_height="1dp" />
+
+        <Button
+            android:id="@+id/btnMtaLauncherConfig"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:background="@drawable/btn_dark"
+            android:text="🌐 Servidor MTA"
+            android:textColor="#4CC9F0"
+            android:textSize="11sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+    </LinearLayout>
+
+</LinearLayout>

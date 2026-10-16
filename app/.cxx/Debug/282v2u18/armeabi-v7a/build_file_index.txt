@@ -1,0 +1,2 @@
+C:\Users\Administrator\Documents\gta-android-main\android\app\src\main\cpp\CMakeLists.txt
+C:\Users\Administrator\Documents\gta-android-main\android\app\src\main\cpp\src\CMakeLists.txt

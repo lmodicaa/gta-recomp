@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mtaHudRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false">
+
+    <!-- Top Action & Status Bar -->
+    <LinearLayout
+        android:id="@+id/mtaTopBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Status badge -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:background="#D015161D"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MTA:SA"
+                android:textColor="#F6D20F"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_marginEnd="6dp" />
+
+            <TextView
+                android:id="@+id/tvMtaStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Desconectado"
+                android:textColor="#A0A0B0"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Connect button -->
+        <Button
+            android:id="@+id/btnMtaOpenConnect"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="#D0252632"
+            android:text="🌐 SERVIDOR"
+            android:textColor="#4CC9F0"
+            android:textSize="11sp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp" />
+
+        <!-- Toggle Chat button -->
+        <Button
+            android:id="@+id/btnMtaToggleChat"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="#D0252632"
+            android:text="💬 CHAT"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp" />
+
+        <!-- Quick Vehicles button -->
+        <Button
+            android:id="@+id/btnMtaVehicles"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="#D0252632"
+            android:text="🚗 VEHÍCULOS"
+            android:textColor="#F6D20F"
+            android:textSize="11sp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp" />
+
+        <!-- Scoreboard button -->
+        <Button
+            android:id="@+id/btnMtaScoreboard"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="#D0252632"
+            android:text="📊 TABLA"
+            android:textColor="#4ADE80"
+            android:textSize="11sp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp" />
+    </LinearLayout>
+
+    <!-- In-Game Chat Box (Overlay) -->
+    <LinearLayout
+        android:id="@+id/mtaChatBox"
+        android:layout_width="380dp"
+        android:layout_height="220dp"
+        android:layout_below="@id/mtaTopBar"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
+        android:background="#C812131A"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <!-- Messages log -->
+        <ScrollView
+            android:id="@+id/svMtaChat"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <TextView
+                android:id="@+id/tvMtaChatLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:text="[MTA] Bienvenido a Multi Theft Auto Android.\n[MTA] Presiona 'SERVIDOR' para conectar.\n" />
+        </ScrollView>
+
+        <!-- Input field and send button -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/etMtaChatInput"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#D020222D"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#707080"
+                android:hint="Escribe un mensaje o /comando..."
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:textSize="12sp"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/btnMtaSendChat"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/btn_gold"
+                android:text="ENVIAR"
+                android:textColor="#000000"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- In-Game Scoreboard (TAB Overlay) -->
+    <LinearLayout
+        android:id="@+id/mtaScoreboardBox"
+        android:layout_width="450dp"
+        android:layout_height="280dp"
+        android:layout_centerInParent="true"
+        android:background="#E0101118"
+        android:orientation="vertical"
+        android:padding="12dp"
+        android:visibility="gone">
+
+        <!-- Header -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/tvMtaScoreboardTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MTA:SA - TABLA DE JUGADORES"
+                android:textColor="#F6D20F"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btnMtaCloseScoreboard"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_alignParentEnd="true"
+                android:background="#D0252632"
+                android:text="✕"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+        </RelativeLayout>
+
+        <!-- Column headers -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="26dp"
+            android:background="#30FFFFFF"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="ID"
+                android:textColor="#F6D20F"
+                android:textStyle="bold"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="JUGADOR"
+                android:textColor="#F6D20F"
+                android:textStyle="bold"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:text="VIDA"
+                android:textColor="#F6D20F"
+                android:textStyle="bold"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:text="ARMAD."
+                android:textColor="#F6D20F"
+                android:textStyle="bold"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:text="PING"
+                android:textColor="#F6D20F"
+                android:textStyle="bold"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+        <!-- Player entries -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginTop="4dp">
+
+            <TextView
+                android:id="@+id/tvMtaScoreboardList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:padding="6dp"
+                android:fontFamily="monospace"
+                android:text="Cargando..." />
+        </ScrollView>
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,142 @@
+[
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-mdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\color_common_signin_btn_text_dark.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\color\\common_signin_btn_text_dark.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\drawable_btn_gold.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\drawable\\btn_gold.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\drawable\\ic_launcher_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-mdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "com.gta.reversed.app-debug-44:/layout_layout_mta_hud.xml.flat",
+        "source": "com.gta.reversed.app-main-46:/layout/layout_mta_hud.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-hdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\xml_provider_paths.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\xml\\provider_paths.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\font_muller_medium.ttf.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\font\\muller_medium.ttf"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\drawable_btn_dark.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\drawable\\btn_dark.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xxxhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\font_din_pro_medium.ttf.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\font\\din_pro_medium.ttf"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-hdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\color_wallet_secondary_text_holo_dark.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\color\\wallet_secondary_text_holo_dark.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xxhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\layout_activity_main.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\drawable_card_background.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\drawable\\card_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\color_wallet_primary_text_holo_light.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\color\\wallet_primary_text_holo_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-mdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\color_common_signin_btn_text_light.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\color\\common_signin_btn_text_light.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-hdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\layout_layout_mta_hud.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\layout\\layout_mta_hud.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\drawable_btn_mta_menu.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\drawable\\btn_mta_menu.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xhdpi\\ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\mipmap-xxxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\font_din_pro_bold.ttf.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\font\\din_pro_bold.ttf"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-debug-44:\\layout_dialog_mta_connect.xml.flat",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\layout\\dialog_mta_connect.xml"
+    }
+]

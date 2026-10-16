@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.gta.reversed.app-mergeDebugResources-43:/layout/layout_mta_hud.xml",
+        "source": "com.gta.reversed.app-main-46:/layout/layout_mta_hud.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-mergeDebugResources-43:\\layout\\activity_main.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\layout\\activity_main.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-mergeDebugResources-43:\\layout\\layout_mta_hud.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\layout\\layout_mta_hud.xml"
+    },
+    {
+        "merged": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-mergeDebugResources-43:\\layout\\dialog_mta_connect.xml",
+        "source": "C:\\Users\\Administrator\\.gradle\\daemon\\8.7\\com.gta.reversed.app-main-46:\\layout\\dialog_mta_connect.xml"
+    }
+]
