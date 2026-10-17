@@ -1,4 +1,8 @@
 ninja: Entering directory `C:\Users\Administrator\Documents\gta-android-main\android\app\.cxx\Debug\282v2u18\arm64-v8a'
-[1/3] Building CXX object src/CMakeFiles/reGTA.dir/mta/core/MtaHooks.cpp.o
-[2/3] Building CXX object src/CMakeFiles/reGTA.dir/mta/core/MtaClient.cpp.o
-[3/3] Linking CXX shared library C:\Users\Administrator\Documents\gta-android-main\android\app\build\intermediates\cxx\Debug\282v2u18\obj\arm64-v8a\libreGTA.so
+[1/7] Building CXX object src/CMakeFiles/reGTA.dir/mta/core/MtaHooks.cpp.o
+[2/7] Building CXX object src/CMakeFiles/reGTA.dir/mta/game/MtaGameInterface.cpp.o
+[3/7] Building CXX object src/CMakeFiles/reGTA.dir/mta/ui/MtaJNI.cpp.o
+[4/7] Building CXX object src/CMakeFiles/reGTA.dir/mta/multiplayer/MtaPlayerManager.cpp.o
+[5/7] Building CXX object src/CMakeFiles/reGTA.dir/mta/net/MtaNetwork.cpp.o
+[6/7] Building CXX object src/CMakeFiles/reGTA.dir/mta/core/MtaClient.cpp.o
+[7/7] Linking CXX shared library C:\Users\Administrator\Documents\gta-android-main\android\app\build\intermediates\cxx\Debug\282v2u18\obj\arm64-v8a\libreGTA.so

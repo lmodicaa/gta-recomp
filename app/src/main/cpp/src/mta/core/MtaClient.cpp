@@ -5,9 +5,17 @@
 #include "mta/ui/MtaJNI.h"
 #include "vendor/log/log.h"
 #include <chrono>
+#include <cstdint>
+#include <cinttypes>
 #include <sstream>
 #include <cctype>
 #include <cmath>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+static inline pid_t CurrentTid() {
+    return static_cast<pid_t>(syscall(SYS_gettid));
+}
 
 MtaClient& MtaClient::Get() {
     static MtaClient instance;
@@ -16,11 +24,12 @@ MtaClient& MtaClient::Get() {
 
 MtaClient::MtaClient()
     : m_initialized(false),
+      m_3dWorldReady(false),
       m_playerSpawned(false),
       m_lastStartAttempt(0),
       m_startAttempts(0),
-      m_pendingVehicleModel(-1),
-      m_pendingVehicleTicks(0),
+      m_activeVehicleModel(-1),
+      m_activeVehicleAttempts(0),
       m_pendingSkinId(-1),
       m_pendingSkinTicks(0) {
 }
@@ -35,18 +44,30 @@ static uint32_t GetCurrentTimeMs() {
 }
 
 void MtaClient::Initialize() {
+    Log("[MTA-CLIENT] Initialize() called (this=%p, tid=%d, already_init=%d)",
+        this, CurrentTid(), m_initialized);
     if (m_initialized) return;
 
     Log("[MTA-CLIENT] ========================================");
-    Log("[MTA-CLIENT] Initializing Multi Theft Auto Android...");
+    Log("[MTA-CLIENT] Initializing Multi Theft Auto Android (this=%p)...", this);
     Log("[MTA-CLIENT] Protocol: MTA:SA Blue Core");
     Log("[MTA-CLIENT] ========================================");
 
-    MtaGameInterface::Get().Initialize();
+    EnsureGameInterface();
     MtaPlayerManager::Get().Initialize();
     MtaUI::Get().Initialize();
 
     m_initialized = true;
+}
+
+void MtaClient::EnsureGameInterface() {
+    if (!MtaGameInterface::Get().IsInitialized()) {
+        MtaGameInterface::Get().Initialize();
+    }
+    if (!m_3dWorldReady && MtaGameInterface::Get().GetLocalPlayerPed() != nullptr) {
+        m_3dWorldReady = true;
+        Log("[MTA-CLIENT] 3D world detected ready via active player ped (this=%p).", this);
+    }
 }
 
 void MtaClient::TriggerPlayerSpawn() {
@@ -56,11 +77,27 @@ void MtaClient::TriggerPlayerSpawn() {
 }
 
 void MtaClient::RequestSpawnVehicle(int modelId) {
-    if (modelId < 400 || modelId > 611) return;
+    if (modelId < 400 || modelId > 611) {
+        Log("[MTA-VEH] request rejected: invalid model %d (expected 400..611)", modelId);
+        return;
+    }
     if (!m_initialized) Initialize();
-    m_pendingVehicleModel = modelId;
-    m_pendingVehicleTicks = 0;
+
+    // [MTA-VEH] Producer: push into the mutex-protected queue (callable from any thread).
+    size_t queueSize = 0;
+    {
+        std::lock_guard<std::mutex> lock(m_vehicleQueueMutex);
+        if (m_vehicleQueue.size() >= 8) {
+            Log("[MTA-VEH] ER: spawn queue full (%zu), dropping model %d", m_vehicleQueue.size(), modelId);
+            MtaJNI::NotifyJavaChat("MTA", "Cola de spawn llena, ignorado.");
+            return;
+        }
+        m_vehicleQueue.push_back(modelId);
+        queueSize = m_vehicleQueue.size();
+    }
     Log("[MTA-CLIENT] Vehicle spawn queued: Model %d", modelId);
+    Log("[MTA-VEH] request queued (model=%d, queueSize=%zu, this=%p, &queue=%p, &mutex=%p, tid=%d)",
+        modelId, queueSize, this, &m_vehicleQueue, &m_vehicleQueueMutex, CurrentTid());
 }
 
 void MtaClient::RequestSetSkin(int skinId) {
@@ -71,66 +108,195 @@ void MtaClient::RequestSetSkin(int skinId) {
     Log("[MTA-CLIENT] Skin change queued: ID %d", skinId);
 }
 
+// [MTA-VEH] Vehicle spawn queue consumer — drained once per frame from the game-loop
+// hooks (hook_Idle / hook_CGame_Process), never from the UI thread.
+//
+// Binary facts (libGTASA.so ARM64 — llvm-objdump + llvm-readelf, verified):
+//  - CStreaming::RequestModel(int,int) @0x3949e0: bit 0x2 = GAME_REQUIRED.
+//  - CStreaming::LoadAllRequestedModels(bool) @0x396b28: loops FlushChannels/
+//    ProcessLoadingChannel/RequestModelStream and clears its re-entrancy flag at the
+//    end (0x396cf4), so calling it every frame is safe.
+//  - CStreaming::ms_aInfoForModel @0x8f2184: stride 20, m_nLoadState at +0x10,
+//    LOADSTATE_LOADED == 1.
+//  - CCarCtrl::CreateCarForScript(int, CVector, unsigned char) @0x3afa70: returns the
+//    CVehicle*, sets the world position itself (z clamped with ground query + collision
+//    radius), joins the road system and calls CWorld::Add INTERNALLY via
+//    PLT 0x22b1e0 -> GOT 0x8469a0 -> _ZN6CWorld3AddEP7CEntity @0x507518 (readelf).
+//    => do NOT call CWorld::Add again, or the entity is inserted twice.
+//  - CCarCtrl::PossiblyRemoveVehicle @0x3b0410 (sole caller: CCarCtrl::RemoveDistantCars)
+//    early-outs while the byte at CVehicle+0x5E9 is non-zero — the script-owned counter
+//    that SA script handlers and CTaskSimpleCarSetPedInAsPassenger maintain.
 void MtaClient::ProcessPendingVehicleSpawn() {
-    if (m_pendingVehicleModel < 400 || m_pendingVehicleModel > 611) return;
+    pid_t tid = CurrentTid();
 
-    int modelId = m_pendingVehicleModel;
-
-    if (m_pendingVehicleTicks == 0 || (m_pendingVehicleTicks % 60 == 0)) {
-        Log("[MTA-CLIENT] ProcessPendingVehicleSpawn: model=%d, tick=%d, loaded=%d",
-            modelId, m_pendingVehicleTicks, MtaGameInterface::Get().HasModelLoaded(modelId));
-    }
-
-    if (!MtaGameInterface::Get().HasModelLoaded(modelId)) {
-        MtaGameInterface::Get().RequestModel(modelId, 2);
-        m_pendingVehicleTicks++;
-        if (m_pendingVehicleTicks > 300) { // ~5 seconds timeout (at 60fps)
-            Log("[MTA-CLIENT] Timeout waiting for vehicle model %d to load", modelId);
-            MtaJNI::NotifyJavaChat("MTA", "Tiempo de espera agotado cargando vehiculo " + std::to_string(modelId));
-            m_pendingVehicleModel = -1;
-            m_pendingVehicleTicks = 0;
+    // Skip check 1: null instance (repeated every 120 calls)
+    if (this == nullptr) {
+        static uint64_t s_nullThisCount = 0;
+        if (++s_nullThisCount % 120 == 1) {
+            Log("[MTA-VEH] drain skipped: this pointer is null (n=%" PRIu64 ")", s_nullThisCount);
         }
         return;
     }
 
-    // Model loaded! Spawn vehicle cleanly on the game thread
-    m_pendingVehicleModel = -1;
-    m_pendingVehicleTicks = 0;
+    EnsureGameInterface();
 
-    void* handle = dlopen("libGTASA.so", RTLD_NOLOAD | RTLD_NOW);
-    if (!handle) handle = RTLD_DEFAULT;
+    // Skip check 2: GameInterface symbol resolution (repeated every 120 calls)
+    if (!MtaGameInterface::Get().IsInitialized()) {
+        static uint64_t s_giNotInitCount = 0;
+        if (++s_giNotInitCount % 120 == 1) {
+            Log("[MTA-VEH] drain skipped: MtaGameInterface resolution failed (n=%" PRIu64 ", this=%p, tid=%d)",
+                s_giNotInitCount, this, tid);
+        }
+        return;
+    }
+
+    // Skip check 3: 3D world readiness (repeated every 120 calls)
+    if (!m_3dWorldReady) {
+        static uint64_t s_worldNotReadyCount = 0;
+        if (++s_worldNotReadyCount % 120 == 1) {
+            Log("[MTA-VEH] drain skipped: 3D world not ready yet (waiting for CGame::Initialise, n=%" PRIu64 ", this=%p, tid=%d)",
+                s_worldNotReadyCount, this, tid);
+        }
+        return;
+    }
+
+    // One-time log: state of m_initialized and GameInterface at first drain after 3D world ready
+    static bool s_firstDrainAfterWorldReady = false;
+    if (!s_firstDrainAfterWorldReady) {
+        s_firstDrainAfterWorldReady = true;
+        Log("[MTA-VEH] first drain after 3D world ready: m_initialized=%d, gameInterfaceReady=%d (this=%p, tid=%d)",
+            m_initialized, MtaGameInterface::Get().IsInitialized(), this, tid);
+    }
+
+    // Heartbeat every 120 calls
+    static uint64_t s_drainTick = 0;
+    s_drainTick++;
+    size_t curQueueSize = 0;
+    {
+        std::lock_guard<std::mutex> lock(m_vehicleQueueMutex);
+        curQueueSize = m_vehicleQueue.size();
+    }
+    if (s_drainTick % 120 == 0) {
+        Log("[MTA-VEH] drain tick n=%" PRIu64 " queueSize=%zu tid=%d this=%p &queue=%p &mutex=%p activeModel=%d",
+            s_drainTick, curQueueSize, tid, this, &m_vehicleQueue, &m_vehicleQueueMutex, m_activeVehicleModel);
+    }
+
+    // Skip check 4: active request in flight (repeated every 120 calls)
+    if (m_activeVehicleModel >= 0) {
+        static uint64_t s_activeCount = 0;
+        if (++s_activeCount % 120 == 1) {
+            Log("[MTA-VEH] drain skipped: active request in progress (model=%d, attempts=%d, n=%" PRIu64 ")",
+                m_activeVehicleModel, m_activeVehicleAttempts, s_activeCount);
+        }
+    } else {
+        std::lock_guard<std::mutex> lock(m_vehicleQueueMutex);
+        if (m_vehicleQueue.empty()) {
+            return; // silent by design when idle
+        }
+
+        int modelId = m_vehicleQueue.front();
+        m_vehicleQueue.pop_front();
+        if (modelId < 400 || modelId > 611) {
+            Log("[MTA-VEH] ER: invalid model %d dequeued, skipped", modelId);
+            return;
+        }
+        m_activeVehicleModel = modelId;
+        m_activeVehicleAttempts = 0;
+        Log("[MTA-VEH] dequeued model %d (queueSize=%zu, this=%p, &queue=%p, &mutex=%p, tid=%d)",
+            modelId, m_vehicleQueue.size(), this, &m_vehicleQueue, &m_vehicleQueueMutex, tid);
+    }
+
+    const int modelId = m_activeVehicleModel;
+
+    // Phase A: wait for the model to stream in (retry every frame, budget 300 frames ~5 s).
+    int loadState = MtaGameInterface::Get().GetModelLoadState(modelId);
+    if (loadState != 1 /* LOADSTATE_LOADED */) {
+        if (m_activeVehicleAttempts == 0 || (m_activeVehicleAttempts % 60 == 0)) {
+            Log("[MTA-VEH] phase=load model=%d frame=%d loadState=%d (1=LOADSTATE_LOADED)",
+                modelId, m_activeVehicleAttempts, loadState);
+        }
+        MtaGameInterface::Get().RequestModel(modelId, 2); // 2 = GAME_REQUIRED
+        MtaGameInterface::Get().FlushModelRequests();     // LoadAllRequestedModels(false)
+        m_activeVehicleAttempts++;
+        if (m_activeVehicleAttempts > 300) {
+            Log("[MTA-CLIENT] Timeout waiting for vehicle model %d to load (300 frames, loadState=%d)",
+                modelId, loadState);
+            MtaJNI::NotifyJavaChat("MTA", "Tiempo de espera agotado cargando vehiculo " + std::to_string(modelId));
+            m_activeVehicleModel = -1;
+        }
+        return; // request stays active, retried next frame
+    }
+
+    if (m_activeVehicleAttempts != 0) {
+        Log("[MTA-VEH] model %d loaded after %d frame(s) (loadState=1)", modelId, m_activeVehicleAttempts);
+        m_activeVehicleAttempts = 0; // restart budget for the spawn phase below
+    }
+
+    // Phase B: wait for a valid player reference position (budget 120 frames), then spawn.
+    CVector playerPos;
+    if (!MtaGameInterface::Get().GetLocalPlayerPosition(playerPos)) {
+        if (m_activeVehicleAttempts == 0 || (m_activeVehicleAttempts % 60 == 0)) {
+            Log("[MTA-VEH] phase=spawn model=%d frame=%d ER: player position unavailable",
+                modelId, m_activeVehicleAttempts);
+        }
+        m_activeVehicleAttempts++;
+        if (m_activeVehicleAttempts > 120) {
+            Log("[MTA-VEH] ER: dropped model %d (no player position after 120 frames)", modelId);
+            MtaJNI::NotifyJavaChat("MTA", "No hay jugador para colocar el vehiculo " + std::to_string(modelId));
+            m_activeVehicleModel = -1;
+        }
+        return; // retried next frame while the budget lasts
+    }
+
+    // Spawn 5 m in front of the player using the SA heading convention
+    // (forward = (-sin(h), cos(h))), 1 m above the player's z.
+    // CreateCarForScript re-clamps z itself (ground fallback + collision radius).
+    float heading = MtaGameInterface::Get().GetLocalPlayerHeading();
+    CVector spawnPos(
+        playerPos.x - sinf(heading) * 5.0f,
+        playerPos.y + cosf(heading) * 5.0f,
+        playerPos.z + 1.0f
+    );
 
     typedef void* (*CreateCar_t)(int, CVector, unsigned char);
-    CreateCar_t pfn_CreateCar = reinterpret_cast<CreateCar_t>(dlsym(handle, "_ZN8CCarCtrl18CreateCarForScriptEi7CVectorh"));
-
+    static CreateCar_t pfn_CreateCar = nullptr;
+    static bool s_createResolvAttempted = false;
+    if (!s_createResolvAttempted) {
+        s_createResolvAttempted = true;
+        void* handle = dlopen("libGTASA.so", RTLD_NOLOAD | RTLD_NOW);
+        if (!handle) handle = RTLD_DEFAULT;
+        pfn_CreateCar = reinterpret_cast<CreateCar_t>(dlsym(handle, "_ZN8CCarCtrl18CreateCarForScriptEi7CVectorh"));
+        if (!pfn_CreateCar) Log("[MTA-VEH] ER: dlsym(_ZN8CCarCtrl18CreateCarForScriptEi7CVectorh) failed");
+    }
     if (!pfn_CreateCar) {
         Log("[MTA-CLIENT] Cannot resolve CCarCtrl::CreateCarForScript");
         MtaJNI::NotifyJavaChat("MTA", "Error: No se pudo resolver CreateCarForScript.");
+        m_activeVehicleModel = -1;
         return;
     }
 
-    CVector playerPos;
-    if (MtaGameInterface::Get().GetLocalPlayerPosition(playerPos)) {
-        float heading = MtaGameInterface::Get().GetLocalPlayerHeading();
-
-        // Spawn 5 meters directly ahead of the player based on their heading
-        CVector spawnPos(
-            playerPos.x - sinf(heading) * 5.0f,
-            playerPos.y + cosf(heading) * 5.0f,
-            playerPos.z + 0.5f
-        );
-
-        void* pVeh = pfn_CreateCar(modelId, spawnPos, 1);
-        if (pVeh) {
-            MtaGameInterface::Get().SetEntityHeading(pVeh, heading);
-            Log("[MTA-CLIENT] Vehicle %d spawned at (%.2f, %.2f, %.2f) ptr=%p",
-                modelId, spawnPos.x, spawnPos.y, spawnPos.z, pVeh);
-            MtaJNI::NotifyJavaChat("MTA", "Vehiculo " + std::to_string(modelId) + " creado.");
-        } else {
-            Log("[MTA-CLIENT] CCarCtrl::CreateCarForScript returned null for model %d", modelId);
-            MtaJNI::NotifyJavaChat("MTA", "Error al instanciar vehiculo " + std::to_string(modelId));
-        }
+    void* pVeh = pfn_CreateCar(modelId, spawnPos, 1);
+    if (!pVeh) {
+        Log("[MTA-VEH] ER: CreateCarForScript returned null for model %d", modelId);
+        MtaJNI::NotifyJavaChat("MTA", "Error al instanciar vehiculo " + std::to_string(modelId));
+        m_activeVehicleModel = -1;
+        return;
     }
+
+    // Align the fresh vehicle with the player's heading (matrix at CEntity+0x18, ARM64).
+    MtaGameInterface::Get().SetEntityHeading(pVeh, heading);
+
+    // Mark script-owned so the population/traffic cleanup never deletes it:
+    // byte at CVehicle+0x5E9 == 1 -> CCarCtrl::PossiblyRemoveVehicle early-outs forever
+    // (provided flag only decremented by script-ped-in-car tasks, which we never create).
+    *(reinterpret_cast<uint8_t*>(pVeh) + 0x5E9) = 1;
+
+    Log("[MTA-VEH] spawned model %d ptr=%p pos=(%.2f, %.2f, %.2f) heading=%.2f "
+        "(world-add done inside CreateCarForScript; script-owned flag CVehicle+0x5E9=1)",
+        modelId, pVeh, spawnPos.x, spawnPos.y, spawnPos.z, heading);
+    MtaJNI::NotifyJavaChat("MTA", "Vehiculo " + std::to_string(modelId) + " creado.");
+
+    m_activeVehicleModel = -1; // done; next request (if any) starts next frame
 }
 
 void MtaClient::ProcessPendingSkinChange() {
@@ -189,8 +355,10 @@ void MtaClient::Update() {
     MtaNetwork::Get().Process();
     MtaPlayerManager::Get().Update();
 
-    // Process async game actions on game thread
-    ProcessPendingVehicleSpawn();
+    // Pending skin change still drains here (plain-int slot, same thread as Update()).
+    // The vehicle queue must NOT drain here: with the 4 per-frame hooks this path proved
+    // unreliable (tick-0 logs never appeared), so ProcessPendingVehicleSpawn() is now
+    // invoked directly by the game-loop hooks in MtaHooks.cpp — see MtaHooks.cpp.
     ProcessPendingSkinChange();
 
     // Check if player joined MTA multiplayer and needs to enter the world
@@ -216,6 +384,7 @@ void MtaClient::Shutdown() {
     MtaNetwork::Get().Disconnect();
     m_playerSpawned = false;
     MtaGameInterface::Get().ResetGameState();
+    m_3dWorldReady = false;
     m_initialized = false;
 }
 

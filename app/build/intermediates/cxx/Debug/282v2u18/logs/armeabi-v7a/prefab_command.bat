@@ -16,5 +16,5 @@
   --ndk-version ^
   26 ^
   --output ^
-  "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\2\\agp-prefab-staging11494012082841552162\\staged-cli-output" ^
+  "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\2\\agp-prefab-staging11829604455328620365\\staged-cli-output" ^
   "C:\\Users\\Administrator\\.gradle\\caches\\transforms-4\\957cb01a6c79364df8f23114c0dbf410\\transformed\\jetified-shadowhook-1.0.10\\prefab"

@@ -321,6 +321,40 @@ void MtaGameInterface::RequestModel(int modelId, int flags) {
     }
 }
 
+int MtaGameInterface::GetModelLoadState(int modelId) {
+    if (modelId < 0) return -1;
+    static uint8_t* s_pStreamingInfo = nullptr;
+    if (!s_pStreamingInfo) {
+        void* handle = dlopen("libGTASA.so", RTLD_NOLOAD | RTLD_NOW);
+        if (!handle) handle = RTLD_DEFAULT;
+        s_pStreamingInfo = reinterpret_cast<uint8_t*>(dlsym(handle, "_ZN10CStreaming16ms_aInfoForModelE"));
+    }
+    if (!s_pStreamingInfo) return -1;
+    // ms_aInfoForModel: stride 20 bytes, m_nLoadState at +0x10, LOADSTATE_LOADED == 1
+    // (verified against CStreaming::RequestModel disassembly, libGTASA.so ARM64).
+    return s_pStreamingInfo[modelId * 20 + 0x10];
+}
+
+void MtaGameInterface::FlushModelRequests() {
+    static void (*s_pfnLoadAllRequestedModels)(bool) = nullptr;
+    static bool s_resolved = false;
+    if (!s_resolved) {
+        s_resolved = true;
+        void* handle = dlopen("libGTASA.so", RTLD_NOLOAD | RTLD_NOW);
+        if (!handle) handle = RTLD_DEFAULT;
+        // CStreaming::LoadAllRequestedModels(bool) @0x396B28 (ARM64):
+        // void, bool in w0; loops FlushChannels/ProcessLoadingChannel/RequestModelStream;
+        // clears its re-entrancy flag at 0x396CF4, safe to call every frame.
+        s_pfnLoadAllRequestedModels = reinterpret_cast<void(*)(bool)>(dlsym(handle, "_ZN10CStreaming22LoadAllRequestedModelsEb"));
+        if (!s_pfnLoadAllRequestedModels) {
+            Log("[MTA-VEH] ER: dlsym(_ZN10CStreaming22LoadAllRequestedModelsEb) failed");
+        }
+    }
+    if (s_pfnLoadAllRequestedModels) {
+        s_pfnLoadAllRequestedModels(false);
+    }
+}
+
 void* MtaGameInterface::SpawnVehicle(int modelId, const CVector& pos, float heading) {
     if (!m_initialized) Initialize();
 

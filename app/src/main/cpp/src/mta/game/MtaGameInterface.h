@@ -8,6 +8,7 @@ public:
     static MtaGameInterface& Get();
 
     bool Initialize();
+    bool IsInitialized() const { return m_initialized; }
 
     // Player access
     void* GetLocalPlayerPed();
@@ -36,6 +37,8 @@ public:
     // Streaming & Model management
     bool HasModelLoaded(int modelId);
     void RequestModel(int modelId, int flags = 2);
+    int  GetModelLoadState(int modelId);   // raw CStreaming m_nLoadState byte (-1 if unresolved)
+    void FlushModelRequests();             // CStreaming::LoadAllRequestedModels(false)
 
     // Remote Players 3D Peds & Entities
     void* CreateRemotePed(unsigned int modelIndex, const CVector& pos);

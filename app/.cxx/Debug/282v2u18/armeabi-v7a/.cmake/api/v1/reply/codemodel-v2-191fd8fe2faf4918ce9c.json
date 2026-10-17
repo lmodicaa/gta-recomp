@@ -13,7 +13,7 @@
 					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
 					"minimumCMakeVersion" : 
 					{
-						"string" : "3.12"
+						"string" : "3.6.0"
 					},
 					"projectIndex" : 0,
 					"source" : "."
@@ -46,7 +46,7 @@
 					[
 						0
 					],
-					"name" : "Project"
+					"name" : "reGTA_Top"
 				},
 				{
 					"directoryIndexes" : 
@@ -66,7 +66,7 @@
 				{
 					"directoryIndex" : 1,
 					"id" : "reGTA::@145eef247bfb46b6828c",
-					"jsonFile" : "target-reGTA-Debug-4bbc9686ac08618ac59e.json",
+					"jsonFile" : "target-reGTA-Debug-bb6379c431826ac629bf.json",
 					"name" : "reGTA",
 					"projectIndex" : 1
 				}

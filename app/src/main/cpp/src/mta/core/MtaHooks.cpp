@@ -6,16 +6,70 @@
 #include "vendor/log/log.h"
 #include "vendor/javawrapper/JavaWrapper.h"
 #include <jni.h>
+#include <atomic>
+#include <cinttypes>
 #include <cstring>
 #include <cstdlib>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+static inline pid_t CurrentTid() {
+    return static_cast<pid_t>(syscall(SYS_gettid));
+}
+
+// [MTA-HOOK] One-shot first-fire logs so a single run of logcat answers definitively
+// which per-frame hook(s) actually execute on this device build.
+static void LogFirstFire(const char* hookName, std::atomic<int>& flag) {
+    int expected = 0;
+    if (flag.compare_exchange_strong(expected, 1)) {
+        Log("[MTA-HOOK] %s fired for the first time (tid=%d)", hookName, CurrentTid());
+    }
+}
+
+// [MTA-VEH] Game-thread drain latch.
+// Binary evidence (libGTASA.so ARM64): this port runs the game and the render loop in
+// the same thread chain — CGame::Process (via PLT 0x21e1d0) and RenderScene are both
+// called from inside Idle() per frame.
+static std::atomic<pid_t> s_gameTid{0};
+
+static void DrainGameThreadQueue(const char* hookName) {
+    pid_t tid = CurrentTid();
+    pid_t expected = 0;
+    if (s_gameTid.compare_exchange_strong(expected, tid)) {
+        Log("[MTA-VEH] game-thread drain claimed by %s (tid=%d)", hookName, tid);
+    } else if (s_gameTid.load() != tid) {
+        static pid_t s_lastLoggedTid = 0;
+        if (s_lastLoggedTid != tid) {
+            s_lastLoggedTid = tid;
+            Log("[MTA-VEH] game-thread drain updated by %s: old_tid=%d, new_tid=%d",
+                hookName, s_gameTid.load(), tid);
+            s_gameTid.store(tid);
+        }
+    }
+
+    static uint64_t s_hookDrainCount = 0;
+    if (++s_hookDrainCount % 120 == 0) {
+        Log("[MTA-HOOK] drain caller hook=%s count=%" PRIu64 " tid=%d", hookName, s_hookDrainCount, tid);
+    }
+
+    // Drains the [MTA-VEH] queue once per frame on the engine thread
+    MtaClient::Get().ProcessPendingVehicleSpawn();
+}
+
+static std::atomic<int> s_fired_CGame_Process{0};
+static std::atomic<int> s_fired_NVEventEGLSwapBuffers{0};
+static std::atomic<int> s_fired_Idle{0};
+static std::atomic<int> s_fired_FrontendIdle{0};
 
 static void (*orig_CGame_Initialise)(const char*) = nullptr;
 static void hook_CGame_Initialise(const char* dataPath) {
-    Log("[MTA-HOOK] CGame::Initialise called with path: %s", dataPath ? dataPath : "null");
+    Log("[MTA-HOOK] CGame::Initialise called with path: %s (tid=%d)", dataPath ? dataPath : "null", CurrentTid());
     if (orig_CGame_Initialise) {
         orig_CGame_Initialise(dataPath);
     }
     Log("[MTA-HOOK] CGame::Initialise completed successfully! 3D world ready.");
+    MtaClient::Get().Set3dWorldReady(true);
+    MtaClient::Get().EnsureGameInterface();
     MtaClient::Get().Initialize();
 
     // If already in MTA multiplayer, trigger spawn immediately now that world exists
@@ -37,8 +91,16 @@ static void hook_CGame_Process() {
     if (orig_CGame_Process) {
         orig_CGame_Process();
     }
-    // MTA Client tick update during active gameplay
+    // MTA Client tick update during active gameplay (kept: network/INGAME-spawn logic)
     MtaClient::Get().Update();
+    // [MTA-VEH] Per-frame drain — CGame::Process runs inside Idle() on the game thread
+    // (verified: its only caller is Idle+0x1c20 via PLT 0x21e1d0).
+    LogFirstFire("CGame::Process", s_fired_CGame_Process);
+    static uint64_t s_cgameCount = 0;
+    if (++s_cgameCount % 120 == 0) {
+        Log("[MTA-HOOK] CGame::Process tick count=%" PRIu64 " tid=%d", s_cgameCount, CurrentTid());
+    }
+    DrainGameThreadQueue("CGame::Process");
 }
 
 static void (*orig_CGame_ShutDown)() = nullptr;
@@ -50,13 +112,16 @@ static void hook_CGame_ShutDown() {
     }
 }
 
-
-
 // Hook NVEventEGLSwapBuffers - Android per-frame render heartbeat
 static void (*orig_NVEventEGLSwapBuffers)() = nullptr;
 static void hook_NVEventEGLSwapBuffers() {
     // MTA Client tick update on every single render frame (menu, loading, ingame)
     MtaClient::Get().Update();
+    LogFirstFire("NVEventEGLSwapBuffers", s_fired_NVEventEGLSwapBuffers);
+    static uint64_t s_swapCount = 0;
+    if (++s_swapCount % 120 == 0) {
+        Log("[MTA-HOOK] NVEventEGLSwapBuffers tick count=%" PRIu64 " tid=%d", s_swapCount, CurrentTid());
+    }
 
     if (orig_NVEventEGLSwapBuffers) {
         orig_NVEventEGLSwapBuffers();
@@ -69,8 +134,17 @@ static void hook_Idle(void* pData, bool bParam) {
     if (orig_Idle) {
         orig_Idle(pData, bParam);
     }
-    // MTA Client tick update during active 3D gameplay
+    // MTA Client tick update during active 3D gameplay (kept: network/INGAME-spawn logic)
     MtaClient::Get().Update();
+    // [MTA-VEH] Primary per-frame drain: Idle() is the game-loop function of this port
+    // (its body calls CGame::Process via PLT and RenderScene; AppEventHandler rsIDLE=26
+    // and Pump_SwapBuffers call it every frame on the RenderWare/NV thread).
+    LogFirstFire("Idle", s_fired_Idle);
+    static uint64_t s_idleCount = 0;
+    if (++s_idleCount % 120 == 0) {
+        Log("[MTA-HOOK] Idle tick count=%" PRIu64 " tid=%d", s_idleCount, CurrentTid());
+    }
+    DrainGameThreadQueue("Idle");
 }
 
 // Hook FrontendIdle - menu per-frame heartbeat on GTA SA Android
@@ -81,6 +155,12 @@ static void hook_FrontendIdle() {
     }
     // MTA Client tick update during frontend menu
     MtaClient::Get().Update();
+    LogFirstFire("FrontendIdle", s_fired_FrontendIdle);
+    static uint64_t s_feIdleCount = 0;
+    if (++s_feIdleCount % 120 == 0) {
+        Log("[MTA-HOOK] FrontendIdle tick count=%" PRIu64 " tid=%d", s_feIdleCount, CurrentTid());
+    }
+    DrainGameThreadQueue("FrontendIdle");
 }
 
 // Hook CText::Get so "FEP_MTA" displays "MULTI THEFT AUTO"
